@@ -370,10 +370,12 @@ def inject_planet_in_cube(cube, cube_angles, template, contrast, separation, pos
     
 
 #%% Imports the data
+# Access to the data on the LAM Cloud:
+# /Users/echoquet/Nextcloud/PhD-Lisa/HAR_school/Tutoriel_2_PostProcessing
 
 
-path_data = '/Users/echoquet/Documents/Research/Code_Workspace/Python_workspace/2020-HRA_School_draft/Dataset_2'
-target_name = 'Target-2'
+path_data = '/Users/echoquet/Nextcloud/PhD-Lisa/HAR_school/Tutoriel_2_PostProcessing/'
+target_name = 'Dataset_2/Target-2'
 
 
 if not os.path.exists(path_data):
@@ -473,9 +475,8 @@ plt.show()
 ref_cube = deepcopy(sci_cube)
 
 # For RDI you have to import another dataset
-# path_data_ref = '/Users/echoquet/Documents/Research/Code_Workspace/Python_workspace/2020-HRA_School_draft/Dataset_2'
-# ref_name = 'Target-2'
-# ref_cube = fits.getdata(os.path.join(path_data_ref, ref_name + '_science_cube.fits'))#[cam]
+# ref_name = 'Dataset_3/Target-3'
+# ref_cube = fits.getdata(os.path.join(path_data, ref_name + '_science_cube.fits'))#[cam]
 # print(ref_cube.shape)
 
 #%% Classical subtraction
