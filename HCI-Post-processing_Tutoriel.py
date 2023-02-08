@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import scipy.ndimage as ndimage
 from copy import deepcopy
 from time import time
+from glob import glob
 plt.rcParams['image.origin'] = 'lower'
 
 
@@ -370,51 +371,26 @@ def inject_planet_in_cube(cube, cube_angles, template, contrast, separation, pos
     
 
 #%% Imports the data
-# Access to the data on the LAM Cloud:
-# /Users/echoquet/Nextcloud/PhD-Lisa/HAR_school/Tutoriel_2_PostProcessing
 
-
-path_data = '/Users/echoquet/Nextcloud/PhD-Lisa/HAR_school/Tutoriel_2_PostProcessing/'
-target_name = 'Dataset_2/Target-2'
+path_data = '/Users/echoquet/Nextcloud/Tuto-HCI-Post-processing/Dataset_2'
 
 
 if not os.path.exists(path_data):
     print('ERROR! Folder path_data does not exist.')
 
-if not os.path.exists(os.path.join(path_data, target_name + '_science_cube.fits')):
+sci_cube_files = glob(os.path.join(path_data, '*_science_cube.fits'))
+
+if len(sci_cube_files)==0:
     print('ERROR! target_name does not exist.')
+else:
+    sci_cube_file = sci_cube_files[0]
    
-# Imports the science data cube, the associated parallactic angles, and the unobscured PSF.
-# The data have a 4th dimension because the instrument has two cameras working in parallel (with different filters).
-# We focus on a single camera in this tutorial (cam=0) for sake of simplicity.
-# The unobscured PSF is used to calibrate the contrast to the star, and is used as template PSF to simulate fake planets.
-# The unit of the images (data cube and PSF) is count/s.
-# cam = 0
-# sci_cube = fits.getdata(os.path.join(path_data, target_name + '_science_cube.fits'))[cam]
-# unobscured_psf = np.mean(fits.getdata(os.path.join(path_data, target_name + '_psf.fits'))[cam],axis=0)
 
-# # sci_cube = fits.getdata(os.path.join(path_data, target_name + '_science_cube.fits'))
-# # print(sci_cube.shape)
-# # dimout=300
-# # dimin=sci_cube.shape[2]
-# # trunc=int((dimin-dimout)/2)
-# # sci_cube = sci_cube[:,trunc:-trunc,trunc:-trunc]
-# # print(sci_cube.shape)
-
-# hdu0 = fits.PrimaryHDU(sci_cube)
-# hdu0.writeto(os.path.join(path_data, target_name + '_science_cube.fits'), overwrite=True)
-
-# # # psf = np.mean(fits.getdata(os.path.join(path_data, target_name + '_psf_cube.fits'))[cam],axis=0)
-# plt.imshow(unobscured_psf)
-# print(unobscured_psf.shape)
-
-# hdu00 = fits.PrimaryHDU(unobscured_psf)
-# hdu00.writeto(os.path.join(path_data, target_name + '_psf.fits'), overwrite=True)
-
-sci_cube = fits.getdata(os.path.join(path_data, target_name + '_science_cube.fits'))
-sci_angles = fits.getdata(os.path.join(path_data, target_name + '_science_derot.fits'))
-unobscured_psf =  fits.getdata(os.path.join(path_data, target_name + '_psf.fits'))
+sci_cube = fits.getdata(sci_cube_file)
+sci_angles = fits.getdata(sci_cube_file.replace('science_cube','science_derot'))
+unobscured_psf =  fits.getdata(sci_cube_file.replace('science_cube','psf'))
 sci_shape = sci_cube.shape
+
 
 print('Number of images in sci_cube: {}'.format(sci_shape[0]))
 print('Image size in sci_cube: {}x{} pix'.format(sci_shape[1],sci_shape[2]))
@@ -433,14 +409,14 @@ if inject_Planet_Q:
     contr = 1e-4
     sci_cube = inject_planet_in_cube(sci_cube, sci_angles, unobscured_psf, contr, separation/pixel_size, pos_angle)
 
-
+#%% Looking at the raw, combined image, without subtraction of the starlight
 
 # Here we derotate all the raw images to be North up, and mean-combine them without PSF subtraction
 raw_im, _ = derotate_and_combine(sci_cube, sci_angles)
 
 
-# The following shows the results without starlight subtraction:
-# The mean-conbined image, the radial mean profile, and the radial STD profile.
+# Calculation of a crude contrast curve
+# From mean-conbined image, the radial mean profile, and the radial STD profile.
 width = 5
 mean_raw, rad_list = radial_mean(raw_im, width=width)
 std_raw, rad_list = radial_std(raw_im, width=width)
@@ -475,8 +451,9 @@ plt.show()
 ref_cube = deepcopy(sci_cube)
 
 # For RDI you have to import another dataset
-# ref_name = 'Dataset_3/Target-3'
-# ref_cube = fits.getdata(os.path.join(path_data, ref_name + '_science_cube.fits'))#[cam]
+# path_ref = '/Users/echoquet/Nextcloud/Tuto-HCI-Post-processing/Dataset_8'
+# ref_cube_file = glob(os.path.join(path_ref, '*_science_cube.fits'))[0]
+# ref_cube = fits.getdata(ref_cube_file)
 # print(ref_cube.shape)
 
 #%% Classical subtraction
@@ -492,15 +469,6 @@ fig,ax = plt.subplots(1,1,figsize=(8,8))
 ax.imshow(red1_im, vmin=-0.5*vmax, vmax=vmax)
 ax.set_title('Classical subtraction combined')
 plt.show()
-
-# hdu1 = fits.PrimaryHDU(red1_cube)
-# hdu1.writeto(os.path.join(path_data, target_name + '_red1_cube.fits'), overwrite=True)
-
-# hdu2 = fits.PrimaryHDU(red1_im)
-# hdu2.writeto(os.path.join(path_data, target_name + '_red1_image.fits'), overwrite=True)
-
-# hdu3 = fits.PrimaryHDU(mean_model)
-# hdu3.writeto(os.path.join(path_data, target_name + '_red1_model.fits'), overwrite=True)
 
 
 width = 5
