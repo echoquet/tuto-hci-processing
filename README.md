@@ -1,6 +1,6 @@
 # Tuto-HCI-processing
 
-Very basic tutorial to learn what is happening under the hood of KLIP when processing coronagraphic images.
+Very basic tutorial to learn what is happening under the hood of KLIP when processing coronagraphic images.  
 The algorithm demonstrated here is from Soummer et al. 2012, APJL 755, L28 (DOI 10.1088/2041-8205/755/2/L28).
 
 The tutorial is based on datasets obtained with the VLT-SPHERE instrument, in pupil-stabilized mode, allowing ADI-type image processing.
